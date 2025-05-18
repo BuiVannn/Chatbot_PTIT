@@ -1,0 +1,6 @@
+.env
+*.pyc
+__pycache__/
+chroma_db.zip
+chatbot_ptit_rag (1).ipynb
+chatbot_ptit_rag.ipynb

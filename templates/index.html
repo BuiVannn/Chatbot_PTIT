@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PTIT RAG Chatbot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a5276;
+            --secondary-color: #2980b9;
+            --light-bg: #f5f9fa;
+            --message-bg: #e8f4fc;
+            --user-message-bg: #d4e6f1;
+            --bot-message-bg: #f2f2f2;
+            --text-color: #333;
+            --light-text: #666;
+            --border-radius: 12px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: var(--light-text);
+        }
+        
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-container {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 450px;
+        }
+        
+        .message-wrapper {
+            display: flex;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message-wrapper {
+            justify-content: flex-end;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .user-avatar {
+            background-color: var(--secondary-color);
+            margin-left: 10px;
+            margin-right: 0;
+            order: 2;
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            max-width: 70%;
+            position: relative;
+        }
+        
+        .user-message {
+            background-color: var(--user-message-bg);
+            border-bottom-right-radius: 0;
+            text-align: right;
+        }
+        
+        .bot-message {
+            background-color: var(--bot-message-bg);
+            border-bottom-left-radius: 0;
+        }
+        
+        .input-area {
+            display: flex;
+            border-radius: var(--border-radius);
+            background-color: white;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        #user-input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        #user-input:focus {
+            border-color: var(--secondary-color);
+        }
+        
+        #send-btn {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        #send-btn i {
+            margin-left: 8px;
+        }
+        
+        #send-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .typing {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .typing-dots {
+            display: flex;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--light-text);
+            border-radius: 50%;
+            margin: 0 2px;
+            opacity: 0.6;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typingAnimation {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 10px;
+            color: var(--light-text);
+            font-size: 0.8rem;
+            border-top: 1px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo_ptit.png') }}" alt="PTIT Logo" class="logo">
+            <h1>PTIT RAG Chatbot</h1>
+            <p>Hỏi đáp về Học viện Công nghệ Bưu chính Viễn thông (PTIT)</p>
+        </div>
+        
+        <div class="chat-container" id="chat-container">
+            <div class="message-wrapper">
+                <div class="avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message bot-message">
+                    Xin chào! Tôi là trợ lý AI của PTIT. Bạn có thể hỏi tôi bất kỳ thông tin gì về Học viện Công nghệ Bưu chính Viễn thông.
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Nhập câu hỏi của bạn về PTIT...">
+            <button id="send-btn">Gửi <i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    
+    <div class="footer">
+        &copy; 2025 Học viện Công nghệ Bưu chính Viễn thông (PTIT). Tất cả các quyền được bảo lưu.
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-btn');
+            
+            function addMessage(message, isUser) {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.classList.add('message-wrapper');
+                if (isUser) {
+                    messageWrapper.classList.add('user-message-wrapper');
+                }
+                
+                const avatar = document.createElement('div');
+                avatar.classList.add('avatar');
+                if (isUser) {
+                    avatar.classList.add('user-avatar');
+                    avatar.innerHTML = '<i class="fas fa-user"></i>';
+                } else {
+                    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                }
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+                messageDiv.textContent = message;
+                
+                if (isUser) {
+                    messageWrapper.appendChild(messageDiv);
+                    messageWrapper.appendChild(avatar);
+                } else {
+                    messageWrapper.appendChild(avatar);
+                    messageWrapper.appendChild(messageDiv);
+                }
+                
+                chatContainer.appendChild(messageWrapper);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            function addTypingIndicator() {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.classList.add('message-wrapper');
+                messageWrapper.id = 'typing-indicator';
+                
+                const avatar = document.createElement('div');
+                avatar.classList.add('avatar');
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                
+                const typingDiv = document.createElement('div');
+                typingDiv.classList.add('message', 'bot-message', 'typing');
+                
+                const typingDots = document.createElement('div');
+                typingDots.classList.add('typing-dots');
+                
+                for (let i = 0; i < 3; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('typing-dot');
+                    typingDots.appendChild(dot);
+                }
+                
+                typingDiv.appendChild(typingDots);
+                messageWrapper.appendChild(avatar);
+                messageWrapper.appendChild(typingDiv);
+                
+                chatContainer.appendChild(messageWrapper);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            function removeTypingIndicator() {
+                const typingDiv = document.getElementById('typing-indicator');
+                if (typingDiv) {
+                    typingDiv.remove();
+                }
+            }
+            
+            async function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+                
+                addMessage(message, true);
+                userInput.value = '';
+                
+                addTypingIndicator();
+                
+                try {
+                    const response = await fetch('/query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ query: message })
+                    });
+                    
+                    const data = await response.json();
+                    removeTypingIndicator();
+                    
+                    if (data.error) {
+                        addMessage(`Lỗi: ${data.error}`, false);
+                    } else {
+                        addMessage(data.answer, false);
+                    }
+                } catch (error) {
+                    removeTypingIndicator();
+                    addMessage(`Lỗi kết nối: ${error.message}`, false);
+                }
+            }
+            
+            sendButton.addEventListener('click', sendMessage);
+            
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
